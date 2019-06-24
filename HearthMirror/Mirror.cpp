@@ -1436,15 +1436,15 @@ namespace hearthmirror {
             {
                 if(keys2[j].value.i32 != starLevel)
                     continue;
-
-                MonoValue locValues = getObject(values2[j], {"m_MedalText", "m_locValues", "_items"});
-                for (unsigned int k=0; i < locValues.arrsize; i++) {
-                    MonoValue value = locValues[k];
-                    if (IsMonoValueEmpty(value)) continue;
-                    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>,char16_t> convert;
-                    std::string dest = convert.to_bytes(value.str);
-                    rank = atoi(dest.c_str());
-                }
+                
+                MonoValue locValues = getObject(values2[j], {"m_medalText", "m_locValues", "_items"});
+                MonoValue value = locValues[0];
+                
+                if (IsMonoValueEmpty(value)) continue;
+                
+                std::wstring_convert<std::codecvt_utf8_utf16<char16_t>,char16_t> convert;
+                std::string dest = convert.to_bytes(value.str);
+                rank = atoi(dest.c_str());
             }
 
             DeleteMonoValue(keys2);
