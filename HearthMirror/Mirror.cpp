@@ -1438,17 +1438,34 @@ namespace hearthmirror {
                     continue;
                 
                 MonoValue locValues = getObject(values2[j], {"m_medalText", "m_locValues", "_items"});
-                MonoValue value = locValues[0];
                 
-                if (IsMonoValueEmpty(value)) continue;
+                for (int k = 0; k < locValues.arrsize; k++) {
+                    MonoValue value = locValues[k];
                 
-                std::wstring_convert<std::codecvt_utf8_utf16<char16_t>,char16_t> convert;
-                std::string dest = convert.to_bytes(value.str);
-                rank = atoi(dest.c_str());
+                    if (IsMonoValueEmpty(value)) continue;
+                    
+                    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>,char16_t> convert;
+                    std::string dest = convert.to_bytes(value.str);
+                    rank = atoi(dest.c_str());
+
+                    if (rank != 0) {
+                        break;
+                    }
+                }
+                    
+                DeleteMonoValue(locValues);
+                
+                if (rank != 0) {
+                    break;
+                }
             }
 
             DeleteMonoValue(keys2);
             DeleteMonoValue(values2);
+
+            if (rank != 0) {
+                break;
+            }
         }
 
         DeleteMonoValue(keys);
