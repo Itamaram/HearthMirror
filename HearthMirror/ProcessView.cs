@@ -25,7 +25,7 @@ namespace HearthMirror
 			if(_procHandle == IntPtr.Zero)
 				throw new Win32Exception(Marshal.GetLastWin32Error());
 
-			if(!GetFirstModule(proc.Id, "mono.dll", out var module))
+			if(!GetFirstModule(proc.Id, "mono-2.0-bdwgc.dll", out var module))
 				return;
 
 			_moduleBase = module.modBaseAddr.ToInt64();

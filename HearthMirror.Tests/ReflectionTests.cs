@@ -9,6 +9,13 @@ namespace HearthMirror.Tests
 	[TestClass]
 	public class ReflectionTests
 	{
+         
+	    [TestMethod]
+	    public void Test()
+	    {
+	        var sys = new Gems().GetSuperSystem();
+	    }
+
 		[TestMethod]
 		public void GameState_InTournamentScreen()
 		{

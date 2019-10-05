@@ -7,6 +7,45 @@ using HearthMirror.Util;
 
 namespace HearthMirror
 {
+    public class Gems
+    {
+        private static readonly Lazy<Mirror> LazyMirror = new Lazy<Mirror>(() => new Mirror {ImageName = "GemsOfWar"});
+        private static Mirror Mirror => LazyMirror.Value;
+
+        public static event Action<Exception> Exception;
+
+        private static T TryGetInternal<T>(Func<T> action, bool clearCache = true)
+        {
+            try
+            {
+                var proc = Mirror.Proc;
+                if(proc == null)
+                    return default(T);
+                if(proc.HasExited)
+                    Mirror.Clean();
+                if(clearCache)
+                    Mirror.View?.ClearCache();
+                return action.Invoke();
+            }
+            catch(Exception e)
+            {
+                Mirror.Clean();
+                try
+                {
+                    return action.Invoke();
+                }
+                catch(Exception e2)
+                {
+                    Exception?.Invoke(e2);
+                    return default(T);
+                }
+            }
+        }
+
+        public dynamic GetSuperSystem() => TryGetInternal(() => Mirror.Root?["GWMenuSuperSystem"]);
+    }
+
+
 	public class Reflection
 	{
 		private static readonly Lazy<Mirror> LazyMirror = new Lazy<Mirror>(() => new Mirror {ImageName = "Hearthstone"});
