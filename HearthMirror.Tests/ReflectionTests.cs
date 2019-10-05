@@ -14,6 +14,7 @@ namespace HearthMirror.Tests
 	    public void Test()
 	    {
 	        var sys = new Gems().GetSuperSystem();
+	        Assert.IsNotNull(sys);
 	    }
 
 		[TestMethod]
