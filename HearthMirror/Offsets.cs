@@ -19,7 +19,7 @@
 		public static uint MonoInternalHashTable_table = 0x14;
 		public static uint MonoClass_parent = 0x20;
 		public static uint MonoClass_nested_in = 0x24;
-		public static uint MonoClass_runtime_info = 0x64;
+		public static uint MonoClass_runtime_info = 0x84;
 		public static uint MonoClass_name = 0x2c;
 		public static uint MonoClass_name_space = 0x30;
 		public static uint MonoClass_next_class_cache = 0xa8;
@@ -36,6 +36,6 @@
 		public static uint MonoType_attrs = 0x4;
 		public static uint MonoType_sizeof = 0x8;
 		public static uint MonoClassRuntimeInfo_domain_vtables = 0x4; // yep
-		public static uint MonoVTable_data = 0x8;
+		public static uint MonoVTable_data = 0x38;
 	}
 }
