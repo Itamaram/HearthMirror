@@ -47,9 +47,9 @@ namespace HearthMirror.Mono
 			}
 		}
 
-		public bool IsValueType => 0 != (_view.ReadUint(_pClass + Offsets.MonoClass_bitfields) & 8);
+		public bool IsValueType => 0 != (_view.ReadUint(_pClass + Offsets.MonoClass_bitfields) & 4);
 
-		public bool IsEnum => 0 != (_view.ReadUint(_pClass + Offsets.MonoClass_bitfields) & 0x10);
+		public bool IsEnum => 0 != (_view.ReadUint(_pClass + Offsets.MonoClass_bitfields) & 0x8);
 
 		public int Size => _view.ReadInt(_pClass + Offsets.MonoClass_sizes);
 
@@ -73,7 +73,11 @@ namespace HearthMirror.Mono
 
 		public MonoType ByvalArg => new MonoType(_view, _pClass + Offsets.MonoClass_byval_arg);
 
-		public int NumFields => Math.Min(MAX_FIELDS_HACK, _view.ReadInt(_pClass + Offsets.MonoClass_field_count));
+	    public int NumFields =>
+	        FullName == "System.Collections.Generic.List`1"
+	            ? 6 // I wonder if this is because it is not a mono object?
+	            : Math.Min(MAX_FIELDS_HACK, _view.ReadInt(_pClass + Offsets.MonoClass_field_count));
+
 
 		public MonoClassField[] Fields
 		{

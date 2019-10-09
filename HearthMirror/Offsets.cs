@@ -24,8 +24,8 @@
 		public static uint MonoClass_name_space = 0x30;
 		public static uint MonoClass_next_class_cache = 0xa8;
 		public static uint MonoClass_fields = 0x60;
-		public static uint MonoClass_sizes = 0x54;
-		public static uint MonoClass_byval_arg = 0x88;
+		public static uint MonoClass_sizes = 0x5c;
+		public static uint MonoClass_byval_arg = 0x74;
 		public static uint MonoClass_bitfields = 0x14;
 		public static uint MonoClass_field_count = 0xa4;
 		public static uint MonoClassField_sizeof = 0x10;
