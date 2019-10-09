@@ -119,38 +119,7 @@ namespace HearthMirror.Mono
 				case MonoTypeEnum.R8:
 					return _view.ReadDouble(addr);
 				case MonoTypeEnum.Szarray:
-					addr = _view.ReadUint(addr); // deref object
-					var vt = _view.ReadUint(addr);
-					var pArrClass = _view.ReadUint(vt);
-					var arrClass = new MonoClass(_view, pArrClass);
-					var elClass = new MonoClass(_view, _view.ReadUint(pArrClass));
-					var count = _view.ReadInt(addr + 12);
-					var start = addr + 16;
-					var result = new object[count];
-					for(var i = 0; i < count; i++)
-					{
-						var ea = start + i* arrClass.Size;
-						if(elClass.IsValueType)
-						{
-							if(elClass.ByvalArg.Type == MonoTypeEnum.ValueType)
-								result[i] = new MonoStruct(_view, elClass, (uint) ea);
-							else if(elClass.ByvalArg.Type == MonoTypeEnum.GenericInst)
-								result[i] = new MonoStruct(_view, elClass, (uint) ea);
-							else
-								result[i] = ReadValue(elClass.ByvalArg.Type, ea);
-						}
-						else if(elClass.ByvalArg.Type == MonoTypeEnum.String)
-							result[i] = ReadValue(elClass.ByvalArg.Type, ea);
-						else
-						{
-							var po = _view.ReadUint(ea);
-							if(po == 0)
-								result[i] = null;
-							else
-								result[i] = new MonoObject(_view, po);
-						}
-					}
-					return result;
+					return ReadSzArray(addr);
 				case MonoTypeEnum.String:
 					var pArr = _view.ReadUint(addr);
 					if(pArr == 0)
@@ -165,5 +134,44 @@ namespace HearthMirror.Mono
 					throw new Exception($"{type} not implemented");
 			}
 		}
+
+	    private object[] ReadSzArray(long addr)
+	    {
+	        addr = _view.ReadUint(addr); // deref object
+	        var vt = _view.ReadUint(addr);
+	        var pArrClass = _view.ReadUint(vt);
+	        var arrClass = new MonoClass(_view, pArrClass);
+	        var elClass = new MonoClass(_view, _view.ReadUint(pArrClass));
+	        var count = _view.ReadInt(addr + 12);
+	        var start = addr + 16;
+	        var result = new object[count];
+	        for (var i = 0; i < count; i++)
+	        {
+	            var ea = start + i * arrClass.Size;
+	            if (elClass.IsValueType)
+	            {
+	                if (elClass.ByvalArg.Type == MonoTypeEnum.ValueType)
+	                    result[i] = new MonoStruct(_view, elClass, (uint) ea);
+	                else if (elClass.ByvalArg.Type == MonoTypeEnum.GenericInst)
+	                    result[i] = new MonoStruct(_view, elClass, (uint) ea);
+	                else
+	                    result[i] = ReadValue(elClass.ByvalArg.Type, ea);
+	            }
+	            else if (elClass.ByvalArg.Type == MonoTypeEnum.String)
+	                result[i] = ReadValue(elClass.ByvalArg.Type, ea);
+	            else if (elClass.Name.EndsWith("[]")) // todo: find a better way to infer class is an array
+	                result[i] = ReadSzArray(ea);
+	            else
+	            {
+	                var po = _view.ReadUint(ea);
+	                if (po == 0)
+	                    result[i] = null;
+	                else
+	                    result[i] = new MonoObject(_view, po);
+	            }
+	        }
+
+	        return result;
+	    }
 	}
 }
