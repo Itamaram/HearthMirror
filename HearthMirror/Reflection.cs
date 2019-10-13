@@ -135,7 +135,7 @@ namespace HearthMirror
         private GemColor[][] GetBoard(MonoObject ui)
         {
             var gems = ui["Gems"];
-            
+
             return Enumerable.Range(0, 8)
                 .Select(i => Enumerable.Range(0, 8)
                     .Select(j => (GemColor)gems[j][i]["GemColor"])
@@ -204,6 +204,15 @@ namespace HearthMirror
         });
     }
 
+    //public bool IsBusy
+    //{
+    //    get
+    //    {
+    //        if (!this.SwappingGems && this.IsPlayerTurn && (!this.m_bStartedMove && !this.m_bStartTurnRunning))
+    //            return !this.m_bGameStarted;
+    //        return true;
+    //    }
+    //}
 
     public class Reflection
     {
