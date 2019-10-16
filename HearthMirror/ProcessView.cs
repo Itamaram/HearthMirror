@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace HearthMirror
 {
-	internal class ProcessView
+    public class ProcessView
 	{
 		private const int PageSize = 4096;
 		private const int PageCount = 1024;
@@ -35,7 +35,7 @@ namespace HearthMirror
 
 		public bool Valid { get; private set; }
 
-		internal void ClearCache() => _cache.Clear();
+	    public void ClearCache() => _cache.Clear();
 
 		private bool GetFirstModule(int pid, string name, out ModuleEntry32 module)
 		{

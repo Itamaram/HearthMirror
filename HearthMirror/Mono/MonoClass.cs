@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace HearthMirror.Mono
 {
-	internal class MonoClass
+    public class MonoClass
 	{
 		//Hack to prevent leak
 		private const int MAX_FIELDS_HACK = 1000;

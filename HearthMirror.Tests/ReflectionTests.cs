@@ -9,22 +9,6 @@ namespace HearthMirror.Tests
 	[TestClass]
 	public class ReflectionTests
 	{
-         
-	    [TestMethod]
-	    public void Test()
-	    {
-	        var sys = new Gems().GetSuperSystem();
-
-	        Assert.IsNotNull(sys);
-	    }
-
-	    [TestMethod]
-	    public void GetGameState()
-	    {
-	        var state = new Gems().GetGameState();
-            Assert.IsNotNull(state);
-	    }
-
 		[TestMethod]
 		public void GameState_InTournamentScreen()
 		{

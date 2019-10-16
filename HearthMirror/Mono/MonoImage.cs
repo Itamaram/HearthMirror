@@ -2,7 +2,7 @@
 
 namespace HearthMirror.Mono
 {
-	internal class MonoImage
+    public class MonoImage
 	{
 		private readonly Dictionary<string, MonoClass> _classes = new Dictionary<string, MonoClass>();
 		private readonly uint _pImage;
@@ -15,7 +15,7 @@ namespace HearthMirror.Mono
 			LoadAllTypes();
 		}
 
-		public dynamic this[string key] => _classes[key];
+		public MonoClass this[string key] => _classes[key];
 
 		private void LoadAllTypes()
 		{

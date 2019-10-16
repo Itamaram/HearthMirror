@@ -1,6 +1,6 @@
 ﻿namespace HearthMirror.Mono
 {
-	internal enum MonoTypeEnum
+    public enum MonoTypeEnum
 	{
 		End = 0x00,
 		Void = 0x01,

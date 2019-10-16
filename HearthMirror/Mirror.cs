@@ -5,7 +5,7 @@ using HearthMirror.Mono;
 
 namespace HearthMirror
 {
-	internal class Mirror
+    public class Mirror
 	{
 		public string ImageName { get; set; }
 		public bool Active => _process != null;
@@ -14,7 +14,7 @@ namespace HearthMirror
 		public Process Proc => _process ?? (_process = Process.GetProcessesByName(ImageName).FirstOrDefault());
 
 		private ProcessView _view;
-		private dynamic _root;
+		private MonoImage _root;
 
 		public ProcessView View
 		{
@@ -26,7 +26,7 @@ namespace HearthMirror
 			}
 		}
 
-		internal void Clean()
+	    public void Clean()
 		{
 			_process = null;
 			_view = null;
@@ -34,7 +34,7 @@ namespace HearthMirror
 			GC.Collect();
 		}
 
-		public dynamic Root
+		public MonoImage Root
 		{
 			get
 			{

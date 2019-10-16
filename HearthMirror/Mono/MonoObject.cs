@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace HearthMirror.Mono
 {
-	internal class MonoObject
+    public class MonoObject
 	{
 		private readonly ProcessView _view;
 		private readonly uint _vtable;
