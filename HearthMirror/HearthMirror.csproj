@@ -59,29 +59,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Objects\DeckDbfRecord.cs" />
-    <Compile Include="Enums\GameSaveKeyId.cs" />
-    <Compile Include="Enums\GameSaveKeySubkeyId.cs" />
     <Compile Include="Native.cs" />
-    <Compile Include="Objects\BrawlInfo.cs" />
-    <Compile Include="Enums\BoxState.cs" />
-    <Compile Include="Enums\Side.cs" />
-    <Compile Include="Enums\Status.cs" />
-    <Compile Include="Objects\AccountId.cs" />
-    <Compile Include="Objects\BattleTag.cs" />
-    <Compile Include="Objects\Collection.cs" />
-    <Compile Include="Objects\DungeonInfo.cs" />
-    <Compile Include="Objects\GameServerInfo.cs" />
-    <Compile Include="Objects\ArenaInfo.cs" />
     <Compile Include="Cache.cs" />
-    <Compile Include="Objects\MatchInfo.cs" />
-    <Compile Include="Objects\Card.cs" />
-    <Compile Include="Objects\Deck.cs" />
-    <Compile Include="Objects\MedalInfo.cs" />
-    <Compile Include="Objects\MedalInfoData.cs" />
-    <Compile Include="Objects\SetFilterItem.cs" />
-    <Compile Include="Objects\TemplateDeck.cs" />
-    <Compile Include="Reflection.cs" />
     <Compile Include="Mirror.cs" />
     <Compile Include="Mono\MonoClass.cs" />
     <Compile Include="Mono\MonoClassField.cs" />
@@ -93,15 +72,6 @@
     <Compile Include="Offsets.cs" />
     <Compile Include="ProcessView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Objects\RewardData.cs" />
-    <Compile Include="Enums\RewardType.cs" />
-    <Compile Include="Objects\SeasonEndInfo.cs" />
-    <Compile Include="Enums\SceneMode.cs" />
-    <Compile Include="Status.cs" />
-    <Compile Include="Enums\UI_WINDOW.cs" />
-    <Compile Include="Util\DeckCache.cs" />
-    <Compile Include="Util\DungeonInfoParser.cs" />
-    <Compile Include="Util\RewardDataParser.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
