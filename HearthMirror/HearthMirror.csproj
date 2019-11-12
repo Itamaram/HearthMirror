@@ -1,53 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{1694A2F8-645A-4263-A6AB-FC26323FD675}</ProjectGuid>
     <TargetFramework>net45</TargetFramework>
     <AssemblyTitle>HearthMirror</AssemblyTitle>
     <Company>HearthSim</Company>
     <Product>HearthMirror</Product>
     <Description>HearthMirror</Description>
     <Copyright>Copyright © HearthSim 2019</Copyright>
-    <AssemblyVersion>15.2.0.33717</AssemblyVersion>
-    <FileVersion>15.2.0.33717</FileVersion>
-    <AssemblyTitle>HearthMirror</AssemblyTitle>
-    <Company>HearthSim</Company>
-    <Product>HearthMirror</Product>
-    <Description>HearthMirror</Description>
-    <Copyright>Copyright © HearthSim 2019</Copyright>
-    <AssemblyVersion>15.2.0.33717</AssemblyVersion>
-    <FileVersion>15.2.0.33717</FileVersion>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AssemblyTitle>HearthMirror</AssemblyTitle>
-    <Company>HearthSim</Company>
-    <Product>HearthMirror</Product>
-    <Description>HearthMirror</Description>
-    <Copyright>Copyright © HearthSim 2019</Copyright>
-    <AssemblyVersion>15.2.0.33717</AssemblyVersion>
-    <FileVersion>15.2.0.33717</FileVersion>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugType>full</DebugType>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
-    <DebugType>full</DebugType>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
-    <DebugType>pdbonly</DebugType>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Net.Http" />
-  </ItemGroup>
 </Project>
