@@ -43,7 +43,7 @@ namespace HearthMirror
             var moduleSnapshot = IntPtr.Zero;
             for (int i = 0; i < 50; i++)
             {
-                moduleSnapshot = Native.CreateToolhelp32Snapshot(SnapshotFlags.Module, (uint)pid);
+                moduleSnapshot = Native.CreateToolhelp32Snapshot(SnapshotFlags.Module | SnapshotFlags.Module32, (uint)pid);
 
                 if (moduleSnapshot != IntPtr.Zero)
                     break;
