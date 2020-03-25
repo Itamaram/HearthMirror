@@ -73,14 +73,23 @@ namespace HearthMirror.Mono
 
         public MonoType ByvalArg => new MonoType(_view, _pClass + Offsets.MonoClass_byval_arg);
 
-        public int NumFields =>
-            FullName switch
+        public int NumFields
+        {
+            get
             {
-                "System.Collections.Generic.List`1" => 6,
-                "System.Collections.Generic.Dictionary`2" => 13, // TODO unhack
-                "System.Collections.Generic.Dictionary`2+Entry"	=> 4, // TODO unhack
-                _ => Math.Min(MAX_FIELDS_HACK, _view.ReadInt(_pClass + Offsets.MonoClass_field_count)),
-            }; 
+                switch (FullName)
+                {
+                    case "System.Collections.Generic.List`1":
+                        return 6;
+                    case "System.Collections.Generic.Dictionary`2":
+                        return 13;
+                    case "System.Collections.Generic.Dictionary`2+Entry":
+                        return 4;
+                    default:
+                        return Math.Min(MAX_FIELDS_HACK, _view.ReadInt(_pClass + Offsets.MonoClass_field_count));
+                }
+            }
+        }
 
 
         public MonoClassField[] Fields

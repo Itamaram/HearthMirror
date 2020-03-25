@@ -6,6 +6,5 @@
     <Product>HearthMirror</Product>
     <Description>HearthMirror</Description>
     <Copyright>Copyright © HearthSim 2019</Copyright>
-    <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 </Project>
