@@ -74,9 +74,13 @@ namespace HearthMirror.Mono
         public MonoType ByvalArg => new MonoType(_view, _pClass + Offsets.MonoClass_byval_arg);
 
         public int NumFields =>
-            FullName == "System.Collections.Generic.List`1"
-                ? 6 // I wonder if this is because it is not a mono object?
-                : Math.Min(MAX_FIELDS_HACK, _view.ReadInt(_pClass + Offsets.MonoClass_field_count));
+            FullName switch
+            {
+                "System.Collections.Generic.List`1" => 6,
+                "System.Collections.Generic.Dictionary`2" => 13, // TODO unhack
+                "System.Collections.Generic.Dictionary`2+Entry"	=> 4, // TODO unhack
+                _ => Math.Min(MAX_FIELDS_HACK, _view.ReadInt(_pClass + Offsets.MonoClass_field_count)),
+            }; 
 
 
         public MonoClassField[] Fields
