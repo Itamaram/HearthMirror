@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace HearthMirror.Mono
     public abstract class MonoItem
     {
         protected ProcessView View { get; }
-        protected uint Root { get; }
+        public uint Root { get; }
 
         protected MonoItem(ProcessView view, uint root)
         {
@@ -35,7 +36,12 @@ namespace HearthMirror.Mono
 
         protected abstract object GetValue(MonoClassField field);
 
-        public object this[string key] => GetValue(Class.GetField(key));
+        public dynamic this[string key] => GetValue(Class.GetField(key));
+
+#if DEBUG
+        public Dictionary<string, object> DebugFields => Class.DebugFields
+            .ToDictionary(f => f.Name, GetValue);
+#endif
     }
 
     public static class DeserialisationExtensions
@@ -75,13 +81,13 @@ namespace HearthMirror.Mono
                 var items = (object[])mi["_items"];
                 var size = (int)mi["_size"];
 
-                var list = Activator.CreateInstance(type);
+                var list = (IList) Activator.CreateInstance(type);
                 var add = typeof(List<>).GetMethod(nameof(List<object>.Add));
 
                 var gt = type.GenericTypeArguments[0];
 
                 for (var i = 0; i < size; i++)
-                    add.Invoke(list, new[] { items[i].Deserialise(gt) });
+                    list.Add(items[i].Deserialise(gt));
 
                 return list;
             }

@@ -7,4 +7,7 @@
     <Description>HearthMirror</Description>
     <Copyright>Copyright © HearthSim 2019</Copyright>
   </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
 </Project>

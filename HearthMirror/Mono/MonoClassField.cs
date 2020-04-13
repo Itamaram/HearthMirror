@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text;
 
 namespace HearthMirror.Mono
@@ -70,22 +71,22 @@ namespace HearthMirror.Mono
             }
             if (isRef)
             {
-                var po = _view.ReadUint(o.PObject + offset);
+                var po = _view.ReadUint(o.Root+ offset);
                 return po == 0 ? null : new MonoObject(_view, po);
             }
             if (typeType == MonoTypeEnum.ValueType)
             {
                 var sClass = new MonoClass(_view, type.Data);
                 if (sClass.IsEnum)
-                    return ReadValue(new MonoClass(_view, _view.ReadUint(type.Data)).ByvalArg.Type, o.PObject + offset);
-                return new MonoStruct(_view, sClass, (uint)(o.PObject + offset));
+                    return ReadValue(new MonoClass(_view, _view.ReadUint(type.Data)).ByvalArg.Type, o.Root + offset);
+                return new MonoStruct(_view, sClass, (uint)(o.Root+ offset));
             }
             if (typeType == MonoTypeEnum.GenericInst)
             {
                 var sClass = new MonoClass(_view, _view.ReadUint(type.Data));
-                return new MonoStruct(_view, sClass, (uint)(o.PObject + offset));
+                return new MonoStruct(_view, sClass, (uint)(o.Root + offset));
             }
-            return ReadValue(typeType, o.PObject + offset);
+            return ReadValue(typeType, o.Root + offset);
         }
 
         private object ReadValue(MonoTypeEnum type, long addr)

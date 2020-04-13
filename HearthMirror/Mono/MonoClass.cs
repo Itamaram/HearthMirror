@@ -107,23 +107,25 @@ namespace HearthMirror.Mono
         {
             if (!FieldsMap.TryGetValue(FullName, out var indexes))
                 indexes = FieldsMap[FullName] = GetFields()
-                    .Select((f, i) => new
+                    .SelectMany((f, i) => NormalizeName(f.Name).Select(alias =>new
                     {
                         Index = (uint) i,
-                        Name = NormalizeName(f.Name)
-                    })
+                        Name = alias
+                    }))
                     .ToDictionary(x => x.Name, x => x.Index);
 
             var pFields = _view.ReadUint(_pClass + Offsets.MonoClass_fields); // todo dedupe
 
             return new MonoClassField(_view, pFields + indexes[name] * Offsets.MonoClassField_sizeof);
 
-            string NormalizeName(string n)
+            IEnumerable<string> NormalizeName(string n)
             {
                 const string prefix = "<", suffix = ">k__BackingField";
-                return n.StartsWith(prefix) && n.EndsWith(suffix)
-                    ? n.Substring(1, n.Length - prefix.Length - suffix.Length)
-                    : n;
+                
+                if(n.StartsWith(prefix) && n.EndsWith(suffix))
+                    yield return n.Substring(1, n.Length - prefix.Length - suffix.Length);
+
+                yield return n;
             }
         }
 
@@ -131,5 +133,9 @@ namespace HearthMirror.Mono
             = new Dictionary<string, IReadOnlyDictionary<string, uint>>();
 
         public dynamic this[string key] => GetField(key)?.StaticValue;
+
+#if DEBUG
+        public IEnumerable<MonoClassField> DebugFields => GetFields();
+#endif
     }
 }
