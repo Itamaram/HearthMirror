@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using HearthMirror.Mono;
 
-namespace HearthMirror.Mono
+namespace HearthMirror.Deserialisation
 {
     public static class DeserialisationExtensions
     {
@@ -42,7 +44,6 @@ namespace HearthMirror.Mono
                 var size = (int)mi["_size"];
 
                 var list = (IList) Activator.CreateInstance(type);
-                var add = typeof(List<>).GetMethod(nameof(List<object>.Add));
 
                 var gt = type.GenericTypeArguments[0];
 
@@ -57,9 +58,15 @@ namespace HearthMirror.Mono
             var result = Activator.CreateInstance(type);
 
             foreach (var prop in type.GetProperties())
-                prop.SetValue(result, Deserialise(mi[prop.Name], prop.PropertyType));
+                prop.SetValue(result, Deserialise(mi[prop.GetPropertyName()], prop.PropertyType));
 
             return result;
+        }
+
+        private static string GetPropertyName(this PropertyInfo prop)
+        {
+            // todo backing field?
+            return prop.GetCustomAttribute<SourceNameAttribute>()?.Name ?? prop.Name;
         }
 
         public static T Deserialise<T>(this MonoItem item) => (T)item.Deserialise(typeof(T));
