@@ -39,7 +39,7 @@ namespace HearthMirror.Mono
         public dynamic this[string key] => GetValue(Class.GetField(key));
 
 #if DEBUG
-        public Dictionary<string, object> DebugFields => Class.DebugFields
+        public Dictionary<string, object> DebugFields => Class.GetFields()
             .ToDictionary(f => f.Name, GetValue);
 #endif
     }

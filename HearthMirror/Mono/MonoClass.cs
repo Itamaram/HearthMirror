@@ -94,7 +94,7 @@ namespace HearthMirror.Mono
             }
         }
 
-        private IEnumerable<MonoClassField> GetFields()
+        public IEnumerable<MonoClassField> GetFields()
         {
             var pFields = _view.ReadUint(_pClass + Offsets.MonoClass_fields);
 
@@ -102,40 +102,15 @@ namespace HearthMirror.Mono
                 .Select(i => new MonoClassField(_view, pFields + (uint)i * Offsets.MonoClassField_sizeof))
                 .Concat(Parent != null ? Parent.GetFields() : Enumerable.Empty<MonoClassField>());
         }
-
-        public MonoClassField GetField(string name)
-        {
-            if (!FieldsMap.TryGetValue(FullName, out var indexes))
-                indexes = FieldsMap[FullName] = GetFields()
-                    .SelectMany((f, i) => NormalizeName(f.Name).Select(alias =>new
-                    {
-                        Index = (uint) i,
-                        Name = alias
-                    }))
-                    .ToDictionary(x => x.Name, x => x.Index);
-
-            var pFields = _view.ReadUint(_pClass + Offsets.MonoClass_fields); // todo dedupe
-
-            return new MonoClassField(_view, pFields + indexes[name] * Offsets.MonoClassField_sizeof);
-
-            IEnumerable<string> NormalizeName(string n)
-            {
-                const string prefix = "<", suffix = ">k__BackingField";
-                
-                if(n.StartsWith(prefix) && n.EndsWith(suffix))
-                    yield return n.Substring(1, n.Length - prefix.Length - suffix.Length);
-
-                yield return n;
-            }
-        }
-
-        private static readonly Dictionary<string, IReadOnlyDictionary<string, uint>> FieldsMap
-            = new Dictionary<string, IReadOnlyDictionary<string, uint>>();
-
+        
         public dynamic this[string key] => GetField(key)?.StaticValue;
 
+        // todo remove ordefault
+        public MonoClassField GetField(string key) => GetFields().FirstOrDefault(f => f.Name == key); 
+
 #if DEBUG
-        public IEnumerable<MonoClassField> DebugFields => GetFields();
+        public Dictionary<string, object> DebugFields => GetFields()
+            .ToDictionary(f => f.Name, f => f.StaticValue);
 #endif
     }
 }
