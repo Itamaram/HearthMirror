@@ -94,23 +94,59 @@ namespace HearthMirror.Mono
             }
         }
 
+        private uint FieldsPointer => _view.ReadUint(_pClass + Offsets.MonoClass_fields);
+
         public IEnumerable<MonoClassField> GetFields()
         {
-            var pFields = _view.ReadUint(_pClass + Offsets.MonoClass_fields);
+            var pFields = FieldsPointer;
 
             return Enumerable.Range(0, NumFields)
-                .Select(i => new MonoClassField(_view, pFields + (uint)i * Offsets.MonoClassField_sizeof))
-                .Concat(Parent != null ? Parent.GetFields() : Enumerable.Empty<MonoClassField>());
+                .Select(i => new MonoClassField(_view, pFields + (uint)i * Offsets.MonoClassField_sizeof));
         }
+
+        public MonoClassField GetField(string name)
+        {
+            if (!FieldsMap.TryGetValue(FullName, out var indexes))
+                indexes = FieldsMap[FullName] = GetFields()
+                    .SelectMany((f, i) => NormalizeName(f.Name).Select(alias =>new
+                    {
+                        Index = (uint) i,
+                        Name = alias
+                    }))
+                    .ToDictionary(x => x.Name, x => x.Index);
+
+            var pFields = FieldsPointer;
+
+            return indexes.TryGetValue(name, out var index)
+                ? new MonoClassField(_view, pFields + index * Offsets.MonoClassField_sizeof)
+                : Parent.GetField(name);
+
+
+            IEnumerable<string> NormalizeName(string n)
+            {
+                const string prefix = "<", suffix = ">k__BackingField";
+                
+                if(n.StartsWith(prefix) && n.EndsWith(suffix))
+                    yield return n.Substring(1, n.Length - prefix.Length - suffix.Length);
+
+                yield return n;
+            }
+        }
+
+        private static readonly Dictionary<string, IReadOnlyDictionary<string, uint>> FieldsMap
+            = new Dictionary<string, IReadOnlyDictionary<string, uint>>();
         
         public dynamic this[string key] => GetField(key)?.StaticValue;
-
-        // todo remove ordefault
-        public MonoClassField GetField(string key) => GetFields().FirstOrDefault(f => f.Name == key); 
-
+        
 #if DEBUG
-        public Dictionary<string, object> DebugFields => GetFields()
+        public Dictionary<string, object> DebugFields => GetFieldsRecursively()
             .ToDictionary(f => f.Name, f => f.StaticValue);
+
+        public IEnumerable<MonoClassField> GetFieldsRecursively()
+        {
+            return GetFields()
+                .Concat(Parent != null ? Parent.GetFields() : Enumerable.Empty<MonoClassField>());
+        }
 #endif
     }
 }
