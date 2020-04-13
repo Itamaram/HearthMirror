@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace HearthMirror.Mono
 {
+    [DebuggerDisplay("{FullName}")]
     public class MonoClass
     {
         //Hack to prevent leak
@@ -91,27 +94,42 @@ namespace HearthMirror.Mono
             }
         }
 
-
-        public MonoClassField[] Fields
+        private IEnumerable<MonoClassField> GetFields()
         {
-            get
+            var pFields = _view.ReadUint(_pClass + Offsets.MonoClass_fields);
+
+            return Enumerable.Range(0, NumFields)
+                .Select(i => new MonoClassField(_view, pFields + (uint)i * Offsets.MonoClassField_sizeof))
+                .Concat(Parent != null ? Parent.GetFields() : Enumerable.Empty<MonoClassField>());
+        }
+
+        public MonoClassField GetField(string name)
+        {
+            if (!FieldsMap.TryGetValue(FullName, out var indexes))
+                indexes = FieldsMap[FullName] = GetFields()
+                    .Select((f, i) => new
+                    {
+                        Index = (uint) i,
+                        Name = NormalizeName(f.Name)
+                    })
+                    .ToDictionary(x => x.Name, x => x.Index);
+
+            var pFields = _view.ReadUint(_pClass + Offsets.MonoClass_fields); // todo dedupe
+
+            return new MonoClassField(_view, pFields + indexes[name] * Offsets.MonoClassField_sizeof);
+
+            string NormalizeName(string n)
             {
-                var nFields = NumFields;
-                var nFieldsParent = Parent?.NumFields ?? 0;
-                var pFields = _view.ReadUint(_pClass + Offsets.MonoClass_fields);
-                var fs = new MonoClassField[nFields + nFieldsParent];
-                for (var i = 0; i < nFields; i++)
-                    fs[i] = new MonoClassField(_view, pFields + (uint)i * Offsets.MonoClassField_sizeof);
-                for (var i = 0; i < nFieldsParent; i++)
-                    fs[nFields + i] = Parent?.Fields[i];
-                return fs;
+                const string prefix = "<", suffix = ">k__BackingField";
+                return n.StartsWith(prefix) && n.EndsWith(suffix)
+                    ? n.Substring(1, n.Length - prefix.Length - suffix.Length)
+                    : n;
             }
         }
 
-        public dynamic this[string key] => Fields.FirstOrDefault(x => x.Name == key)?.StaticValue;
+        private static readonly Dictionary<string, IReadOnlyDictionary<string, uint>> FieldsMap
+            = new Dictionary<string, IReadOnlyDictionary<string, uint>>();
 
-#if (DEBUG)
-        public override string ToString() => FullName;
-#endif
+        public dynamic this[string key] => GetField(key)?.StaticValue;
     }
 }
