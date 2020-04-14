@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using HearthMirror.Mono;
 
@@ -10,7 +11,7 @@ namespace HearthMirror.Deserialisation
     {
         public static object Deserialise(this object obj, Type type)
         {
-            if (type.IsPrimitive)
+            if (type.IsPrimitive || type == typeof(MonoImage))
                 return obj;
 
             if (type.IsArray && type.GetElementType().IsPrimitive)
@@ -38,12 +39,15 @@ namespace HearthMirror.Deserialisation
 
             var mi = (MonoItem)obj;
 
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                return (bool)mi["has_value"] ? mi["value"] : null;
+
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
             {
                 var items = (object[])mi["_items"];
                 var size = (int)mi["_size"];
 
-                var list = (IList) Activator.CreateInstance(type);
+                var list = (IList)Activator.CreateInstance(type);
 
                 var gt = type.GenericTypeArguments[0];
 
@@ -53,12 +57,26 @@ namespace HearthMirror.Deserialisation
                 return list;
             }
 
-            //todo dictionary
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            {
+                var dict = (IDictionary) Activator.CreateInstance(type);
+                var count = (int) mi["count"];
+                var entries = (MonoItem[]) mi["entries"];
+
+                for (var i = 0; i < count; i++)
+                {
+                    var entry = entries[i].Deserialise<DictionaryEntry>();
+                    if (entry.HashCode >= 0)
+                        dict.Add(entry.Key, entry.Value);
+                }
+
+                return dict;
+            }
 
             var result = Activator.CreateInstance(type);
 
             foreach (var prop in type.GetProperties())
-                prop.SetValue(result, Deserialise(mi[prop.GetPropertyName()], prop.PropertyType));
+                prop.SetValue(result, mi[prop.GetPropertyName()].Deserialise(prop.PropertyType));
 
             return result;
         }
@@ -69,6 +87,34 @@ namespace HearthMirror.Deserialisation
             return prop.GetCustomAttribute<SourceNameAttribute>()?.Name ?? prop.Name;
         }
 
-        public static T Deserialise<T>(this MonoItem item) => (T)item.Deserialise(typeof(T));
+        public static T Deserialise<T>(this object item) => (T)item.Deserialise(typeof(T));
+
+        public static T Deserialise<T>(this MonoItem mi, string property)
+            => mi[property].Deserialise<T>();
+
+        public static T Deserialise<T>(this MonoClass mc, string property)
+            => mc[property].Deserialise<T>();
+
+        public static T Deserialise<T>(this MonoClass mc)
+        {
+            var result = Activator.CreateInstance(typeof(T));
+
+            foreach (var prop in typeof(T).GetProperties())
+                prop.SetValue(result, mc[prop.GetPropertyName()].Deserialise(prop.PropertyType));
+
+            return (T)result;
+        }
+
+        private class DictionaryEntry
+        {
+            [SourceName("hashCode")]
+            public int HashCode { get; set; }
+
+            [SourceName("key")]
+            public object Key { get; set; }
+
+            [SourceName("value")]
+            public object Value { get; set; }
+        }
     }
 }

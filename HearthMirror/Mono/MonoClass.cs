@@ -136,7 +136,7 @@ namespace HearthMirror.Mono
         private static readonly Dictionary<string, IReadOnlyDictionary<string, uint>> FieldsMap
             = new Dictionary<string, IReadOnlyDictionary<string, uint>>();
         
-        public dynamic this[string key] => GetField(key)?.StaticValue;
+        public object this[string key] => GetField(key)?.StaticValue;
         
 #if DEBUG
         public Dictionary<string, object> DebugFields => GetFieldsRecursively()

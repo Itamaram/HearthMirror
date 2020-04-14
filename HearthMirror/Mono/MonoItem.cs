@@ -20,11 +20,28 @@ namespace HearthMirror.Mono
 
         protected abstract object GetValue(MonoClassField field);
 
-        public dynamic this[string key] => GetValue(Class.GetField(key));
+        public object this[string key] => GetField(key);
+
+        public object GetField(string key, params string[] chain)
+        {
+            return key.Append(chain)
+                .Aggregate((object) this, (mi, f) => GetValue(((MonoItem) mi).Class.GetField(f)));
+        }
 
 #if DEBUG
         public Dictionary<string, object> DebugFields => Class.GetFieldsRecursively()
             .ToDictionary(f => f.Name, GetValue);
 #endif
+    }
+
+    public static class EnumerableExtensions
+    {
+        public static IEnumerable<T> Append<T>(this T head, IEnumerable<T> tail)
+        {
+            yield return head;
+
+            foreach (var t in tail)
+                yield return t;
+        }
     }
 }
