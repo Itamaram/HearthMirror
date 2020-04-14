@@ -25,7 +25,11 @@ namespace HearthMirror.Mono
         public object GetField(string key, params string[] chain)
         {
             return key.Append(chain)
-                .Aggregate((object) this, (mi, f) => GetValue(((MonoItem) mi).Class.GetField(f)));
+                .Aggregate((object)this, (o, f) =>
+                {
+                    var mi = (MonoItem) o;
+                    return mi.GetValue(mi.Class.GetField(f));
+                });
         }
 
 #if DEBUG

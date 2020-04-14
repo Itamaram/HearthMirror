@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using HearthMirror.Mono;
 
@@ -11,7 +10,10 @@ namespace HearthMirror.Deserialisation
     {
         public static object Deserialise(this object obj, Type type)
         {
-            if (type.IsPrimitive || type == typeof(MonoImage))
+            if (obj == null)
+                return null;
+
+            if (type.IsPrimitive || type == typeof(string) || type == typeof(MonoItem))
                 return obj;
 
             if (type.IsArray && type.GetElementType().IsPrimitive)

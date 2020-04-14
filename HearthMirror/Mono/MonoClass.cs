@@ -115,22 +115,19 @@ namespace HearthMirror.Mono
                     }))
                     .ToDictionary(x => x.Name, x => x.Index);
 
-            var pFields = FieldsPointer;
-
             return indexes.TryGetValue(name, out var index)
-                ? new MonoClassField(_view, pFields + index * Offsets.MonoClassField_sizeof)
+                ? new MonoClassField(_view, FieldsPointer + index * Offsets.MonoClassField_sizeof)
                 : Parent.GetField(name);
-
-
-            IEnumerable<string> NormalizeName(string n)
-            {
-                const string prefix = "<", suffix = ">k__BackingField";
+        }
+        
+        private static IEnumerable<string> NormalizeName(string n)
+        {
+            const string prefix = "<", suffix = ">k__BackingField";
                 
-                if(n.StartsWith(prefix) && n.EndsWith(suffix))
-                    yield return n.Substring(1, n.Length - prefix.Length - suffix.Length);
+            if(n.StartsWith(prefix) && n.EndsWith(suffix))
+                yield return n.Substring(1, n.Length - prefix.Length - suffix.Length);
 
-                yield return n;
-            }
+            yield return n;
         }
 
         private static readonly Dictionary<string, IReadOnlyDictionary<string, uint>> FieldsMap
