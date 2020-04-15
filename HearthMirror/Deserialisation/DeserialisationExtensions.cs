@@ -13,7 +13,7 @@ namespace HearthMirror.Deserialisation
             if (obj == null)
                 return null;
 
-            if (type.IsPrimitive || type == typeof(string) || type == typeof(MonoItem))
+            if (type.IsPrimitive || type == typeof(string) || type == typeof(MonoItem) || type == typeof(object))
                 return obj;
 
             if (type.IsArray && type.GetElementType().IsPrimitive)
@@ -71,13 +71,13 @@ namespace HearthMirror.Deserialisation
 
                 var dict = (IDictionary) Activator.CreateInstance(type);
                 var count = (int) mi["count"];
-                var entries = (MonoItem[]) mi["entries"];
+                var entries = (object[]) mi["entries"];
 
                 for (var i = 0; i < count; i++)
                 {
                     var entry = entries[i].Deserialise<DictionaryEntry>();
                     if (entry.HashCode >= 0)
-                        dict.Add(entry.Key, entry.Value);
+                        dict.Add(entry.Key.Deserialise(type.GenericTypeArguments[0]), entry.Value.Deserialise(type.GenericTypeArguments[1]));
                 }
 
                 return dict;

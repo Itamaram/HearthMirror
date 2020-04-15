@@ -108,7 +108,7 @@ namespace HearthMirror.Mono
         {
             if (!FieldsMap.TryGetValue(FullName, out var indexes))
                 indexes = FieldsMap[FullName] = GetFields()
-                    .SelectMany((f, i) => NormalizeName(f.Name).Select(alias =>new
+                    .SelectMany((f, i) => NormalizeName(f.Name).Where(a => !string.IsNullOrEmpty(a)).Select(alias =>new
                     {
                         Index = (uint) i,
                         Name = alias
