@@ -39,13 +39,19 @@ namespace HearthMirror.Deserialisation
             if (type.IsEnum)
                 return Enum.ToObject(type, (int)obj);
 
-            var mi = (MonoItem)obj;
-
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                return (bool)mi["has_value"] ? mi["value"] : null;
+            {
+                if (obj.GetType() == type.GenericTypeArguments[0])
+                    return obj;
+                
+                var mi = (MonoItem)obj;
+                return (bool) mi["has_value"] ? mi["value"] : null;
+            }
 
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
             {
+                var mi = (MonoItem)obj;
+
                 var items = (object[])mi["_items"];
                 var size = (int)mi["_size"];
 
@@ -61,6 +67,8 @@ namespace HearthMirror.Deserialisation
 
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
             {
+                var mi = (MonoItem)obj;
+
                 var dict = (IDictionary) Activator.CreateInstance(type);
                 var count = (int) mi["count"];
                 var entries = (MonoItem[]) mi["entries"];
@@ -75,7 +83,13 @@ namespace HearthMirror.Deserialisation
                 return dict;
             }
 
+            return PropertywiseDeserialisation(obj, type);
+        }
+
+        private static object PropertywiseDeserialisation(object obj, Type type)
+        {
             var result = Activator.CreateInstance(type);
+            var mi = (MonoItem)obj;
 
             foreach (var prop in type.GetProperties())
                 prop.SetValue(result, mi[prop.GetPropertyName()].Deserialise(prop.PropertyType));

@@ -20,7 +20,8 @@ namespace HearthMirror.Mono
 
         protected abstract object GetValue(MonoClassField field);
 
-        public object this[string key] => GetField(key);
+        // todo improve on this condition/move it elsewhere?
+        public object this[string key] => Class.Name == "" ? null : GetField(key);
 
         public object GetField(string key, params string[] chain)
         {
