@@ -1,37 +1,34 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace HearthMirror.Mono
 {
     public class MonoImage
     {
-        private readonly Dictionary<string, MonoClass> _classes = new Dictionary<string, MonoClass>();
-        private readonly uint _pImage;
-        private readonly ProcessView _view;
+        private readonly IReadOnlyDictionary<string, MonoClass> classes;
 
         public MonoImage(ProcessView view, uint pImage)
         {
-            _view = view;
-            _pImage = pImage;
-            LoadAllTypes();
+            classes = BuildClassDictionary(view, pImage);
         }
 
-        public MonoClass this[string key] => _classes[key];
+        public MonoClass this[string key] => classes[key];
 
-        private void LoadAllTypes()
+        private static Dictionary<string, MonoClass> BuildClassDictionary(ProcessView view, uint root)
         {
-            var ht = _pImage + Offsets.MonoImage_class_cache;
-            var size = _view.ReadUint(ht + Offsets.MonoInternalHashTable_size);
-            var table = _view.ReadUint(ht + Offsets.MonoInternalHashTable_table);
-            for (uint i = 0; i < size; i++)
-            {
-                var pClass = _view.ReadUint(table + 4 * i);
-                while (pClass != 0)
-                {
-                    var klass = new MonoClass(_view, pClass);
-                    _classes[klass.FullName] = klass;
-                    pClass = _view.ReadUint(pClass + Offsets.MonoClass_next_class_cache);
-                }
-            }
+            var ht = root + Offsets.MonoImage_class_cache;
+            var size = view.ReadUint(ht + Offsets.MonoInternalHashTable_size);
+            var table = view.ReadUint(ht + Offsets.MonoInternalHashTable_table);
+            
+            return Enumerable.Range(0, (int) size)
+                .SelectMany(i => ClassCacheChain(view, view.ReadUint(table + 4 * i)))
+                .ToDictionary(mc => mc.FullName);
+        }
+
+        private static IEnumerable<MonoClass> ClassCacheChain(ProcessView view, uint start)
+        {
+            for (var p = start; p != 0; p = view.ReadUint(p + Offsets.MonoClass_next_class_cache))
+                yield return new MonoClass(view, p);
         }
     }
 }
