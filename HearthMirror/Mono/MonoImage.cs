@@ -13,6 +13,7 @@ namespace HearthMirror.Mono
             classes = BuildClassDictionary(view, pImage);
         }
 
+        // todo get name from typeof(T).Name - "Class"
         public T GetClass<T>(string name) where T : class => Generator.GetClass<T>(classes[name]);
 
         public MonoClass this[string key] => classes[key];
