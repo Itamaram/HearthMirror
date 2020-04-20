@@ -6,6 +6,7 @@
     <Product>HearthMirror</Product>
     <Description>HearthMirror</Description>
     <Copyright>Copyright © HearthSim 2019</Copyright>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="4.4.0" />

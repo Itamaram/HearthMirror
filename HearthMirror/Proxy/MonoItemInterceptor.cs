@@ -32,17 +32,30 @@ namespace HearthMirror.Proxy
             }
         }
 
-        private static object GetValue(object raw, Type target)
+        private static object GetValue(object raw, Type type)
         {
-            if (raw == default || IsUnwrappedType(target))
+            if (raw == default)
+                return default;
+            
+            if (IsUnwrappedType(type))
                 return raw;
 
-            if (raw is MonoItem m)
-                return Generator.GetItem(m, target);
-
-            if (target.IsArray)
+            if (type.IsEnum)
+                return Enum.ToObject(type, (int)raw);
+            
+            
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                var gt = target.GetElementType();
+                if (raw.GetType() == type.GenericTypeArguments[0])
+                    return raw;
+
+                var mi = (MonoItem) raw;
+                return (bool) mi["has_value"] ? mi["value"] : null;
+            }
+
+            if (type.IsArray)
+            {
+                var gt = type.GetElementType();
 
                 if (IsUnwrappedType(gt))
                     return raw;
@@ -56,42 +69,50 @@ namespace HearthMirror.Proxy
                 return dst;
             }
 
-            if (target.IsGenericType && target.GetGenericTypeDefinition() == typeof(List<>))
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
             {
-                var gt = target.GenericTypeArguments[0];
+                var mi = (MonoItem) raw;
 
-                if (IsUnwrappedType(gt))
-                    return raw;
+                var items = (object[])mi["_items"];
+                var size = (int)mi["_size"];
 
-                var src = (IList) raw;
-                var dst = (IList)Activator.CreateInstance(target);
+                var list = (IList)Activator.CreateInstance(type); 
 
-                foreach (var item in src)
-                    dst.Add(GetValue(item, gt));
+                for (var i = 0; i < size; i++)
+                    list.Add(GetValue(items[i], type.GenericTypeArguments[0]));
+
+                return list;
+            }
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            {
+                var mi = (MonoItem) raw;
+
+                var gt = type.GenericTypeArguments;
+
+                var dst = (IDictionary) Activator.CreateInstance(type);
+
+                var count = (int) mi["count"];
+                var entries = (object[]) mi["entries"];
+
+                for (var i = 0; i < count; i++)
+                {
+                    var entry = (MonoItem) entries[i];
+
+                    if ((int) entry["hashcode"] >= 0)
+                        dst.Add(GetValue(entry["key"], gt[0]), GetValue(entry["value"], gt[1]));
+                }
 
                 return dst;
             }
 
-            
-            if (target.IsGenericType && target.GetGenericTypeDefinition() == typeof(Dictionary<,>))
-            {
-                if (target.GenericTypeArguments.All(IsUnwrappedType))
-                    return raw;
-
-                var src = (IDictionary) raw;
-                var dst = (IDictionary) Activator.CreateInstance(target);
-
-                foreach (DictionaryEntry entry in src)
-                    dst[GetValue(entry.Key, target.GenericTypeArguments[0])]
-                        = GetValue(entry.Value, target.GenericTypeArguments[1]);
-
-                return dst;
-            }
+            if (raw is MonoItem m)
+                return Generator.GetItem(m, m.GetInternalType()); // todo don't user target, find corresponding type instead
 
             throw new ArgumentException();
         }
 
-        private static bool IsUnwrappedType(Type t) => t.IsPrimitive || t.IsEnum || t == typeof(string);
+        private static bool IsUnwrappedType(Type t) => t.IsPrimitive || t == typeof(string);
     }
 
     public class MonoItemInterceptor : MonoInterceptor
@@ -130,6 +151,22 @@ namespace HearthMirror.Proxy
 
         public static object GetItem(MonoItem mi, Type t)
             => Instance.CreateClassProxy(t, new MonoItemInterceptor(mi));
+    }
+
+    public static class TypeMap
+    {
+        private const string Namespace = "UnitModels";
+
+        private static readonly IReadOnlyDictionary<string, Type> Types =
+            AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(a => a.GetTypes())
+                .Where(t => t.FullName.StartsWith(Namespace))
+                .ToDictionary(t => t.FullName.Substring(Namespace.Length + 1));
+
+        public static Type GetInternalType(this MonoItem mi) =>
+            Types.TryGetValue(mi.Class.FullName, out var type)
+                ? type
+                : throw new ArgumentOutOfRangeException($"External type {mi.Class.FullName} was not mapped internally");
     }
 }
 
