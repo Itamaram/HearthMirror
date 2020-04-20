@@ -8,6 +8,9 @@
     <Copyright>Copyright © HearthSim 2019</Copyright>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Castle.Core" Version="4.4.0" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 </Project>

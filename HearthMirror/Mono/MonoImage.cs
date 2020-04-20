@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HearthMirror.Proxy;
 
 namespace HearthMirror.Mono
 {
@@ -11,6 +12,8 @@ namespace HearthMirror.Mono
         {
             classes = BuildClassDictionary(view, pImage);
         }
+
+        public T GetClass<T>(string name) where T : class => Generator.GetClass<T>(classes[name]);
 
         public MonoClass this[string key] => classes[key];
 
