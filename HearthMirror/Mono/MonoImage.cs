@@ -13,8 +13,10 @@ namespace HearthMirror.Mono
             classes = BuildClassDictionary(view, pImage);
         }
 
+        // todo? mark these top level classes with an interface?
         // todo get name from typeof(T).Name - "Class"
-        public T GetClass<T>(string name) where T : class => Generator.GetClass<T>(classes[name]);
+        public T GetClass<T>() where T : class
+            => Generator.GetClass<T>(classes[typeof(T).Name.Remove(typeof(T).Name.Length - "Class".Length)]);
 
         public MonoClass this[string key] => classes[key];
 

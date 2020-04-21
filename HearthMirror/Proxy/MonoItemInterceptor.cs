@@ -166,7 +166,7 @@ namespace HearthMirror.Proxy
         public static Type GetInternalType(this MonoItem mi) =>
             Types.TryGetValue(mi.Class.FullName, out var type)
                 ? type
-                : throw new ArgumentOutOfRangeException($"External type {mi.Class.FullName} was not mapped internally");
+                : throw new Exception($"External type {mi.Class.FullName} was not mapped internally");
     }
 }
 
