@@ -24,6 +24,7 @@ namespace HearthMirror.Proxy
         {
             try
             {
+                // todo invocation.Method.GetCustomAttribute<SourceNameAttribute>().Name
                 return GetPropertyValue(invocation.Method.Name.Substring(4));
             }
             catch
