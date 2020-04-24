@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Castle.DynamicProxy;
@@ -11,13 +12,18 @@ namespace HearthMirror.Proxy
     {
         protected abstract object GetPropertyValue(string s);
 
+        private readonly ConcurrentDictionary<string, object> cache
+            = new ConcurrentDictionary<string, object>();
+
         public void Intercept(IInvocation invocation)
         {
             invocation.Proceed();
 
-            var val = GetPropertyValue(invocation);
-
-            invocation.ReturnValue = GetValue(val, invocation.Method.ReturnType);
+            invocation.ReturnValue = cache.GetOrAdd(invocation.Method.Name, _ =>
+            {
+                var val = GetPropertyValue(invocation);
+                return GetValue(val, invocation.Method.ReturnType);
+            });
         }
 
         private object GetPropertyValue(IInvocation invocation)
@@ -58,8 +64,8 @@ namespace HearthMirror.Proxy
             {
                 var gt = type.GetElementType();
 
-                if (IsUnwrappedType(gt))
-                    return raw;
+                //if (IsUnwrappedType(gt))
+                //    return raw;
 
                 var src = (object[])raw;
                 var dst = Array.CreateInstance(gt, src.Length);
@@ -100,7 +106,7 @@ namespace HearthMirror.Proxy
                 {
                     var entry = (MonoItem) entries[i];
 
-                    if ((int) entry["hashcode"] >= 0)
+                    if ((int) entry["hashCode"] >= 0)
                         dst.Add(GetValue(entry["key"], gt[0]), GetValue(entry["value"], gt[1]));
                 }
 
@@ -156,7 +162,7 @@ namespace HearthMirror.Proxy
 
     public static class TypeMap
     {
-        private const string Namespace = "UnitModels";
+        private const string Namespace = "UnityModels";
 
         private static readonly IReadOnlyDictionary<string, Type> Types =
             AppDomain.CurrentDomain.GetAssemblies()

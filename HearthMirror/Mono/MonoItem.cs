@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -47,6 +48,13 @@ namespace HearthMirror.Mono
 
             foreach (var t in tail)
                 yield return t;
+        }
+
+        public static IEnumerable<int> SelectIndexWhere<T>(this IEnumerable<T> items, Func<T, bool> predicate)
+        {
+            return items.Select((t, i) => new {Item = t, Index = i})
+                .Where(x => predicate(x.Item))
+                .Select(x => x.Index);
         }
     }
 }
