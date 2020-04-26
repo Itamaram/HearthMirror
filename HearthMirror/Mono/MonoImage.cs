@@ -14,7 +14,6 @@ namespace HearthMirror.Mono
         }
 
         // todo? mark these top level classes with an interface?
-        // todo get name from typeof(T).Name - "Class"
         public T GetClass<T>() where T : class
             => ProxyFactory.WrapClass<T>(classes[typeof(T).Name.Remove(typeof(T).Name.Length - "Class".Length)]);
 
