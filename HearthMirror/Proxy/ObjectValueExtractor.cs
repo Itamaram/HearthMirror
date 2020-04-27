@@ -5,9 +5,16 @@ using HearthMirror.Mono;
 
 namespace HearthMirror.Proxy
 {
-    public static class ObjectValueExtractor
+    public class ObjectValueExtractor
     {
-        public static object GetValue(object raw, Type type)
+        private readonly ProxyFactory proxy;
+
+        public ObjectValueExtractor(ProxyFactory proxy)
+        {
+            this.proxy = proxy;
+        }
+
+        public object GetValue(object raw, Type type)
         {
             if (raw == default)
                 return default;
@@ -78,7 +85,7 @@ namespace HearthMirror.Proxy
             }
 
             if (raw is MonoItem m)
-                return ProxyFactory.WrapItem(m);
+                return proxy.GetItem(m);
 
             // TODO handle this more gracefully, potentially make this extensible?
             // Looks like a missed chance for an open/close pattern

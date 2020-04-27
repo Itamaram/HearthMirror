@@ -7,11 +7,17 @@ namespace HearthMirror
 {
     public class Mirror
     {
-        public string ImageName { get; set; }
+        private readonly string image;
+
+        public Mirror(string image)
+        {
+            this.image = image;
+        }
+
         public bool Active => _process != null;
 
         Process _process;
-        public Process Proc => _process ?? (_process = Process.GetProcessesByName(ImageName).FirstOrDefault());
+        public Process Proc => _process ??= Process.GetProcessesByName(image).FirstOrDefault();
 
         private ProcessView _view;
         private MonoImage _root;
@@ -22,7 +28,7 @@ namespace HearthMirror
             {
                 if (Proc == null)
                     return null;
-                return _view ?? (_view = new ProcessView(Proc));
+                return _view ??= new ProcessView(Proc);
             }
         }
 

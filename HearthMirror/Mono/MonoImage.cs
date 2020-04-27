@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using HearthMirror.Proxy;
 
 namespace HearthMirror.Mono
 {
@@ -12,10 +11,6 @@ namespace HearthMirror.Mono
         {
             classes = BuildClassDictionary(view, pImage);
         }
-
-        // todo? mark these top level classes with an interface?
-        public T GetClass<T>() where T : class
-            => ProxyFactory.WrapClass<T>(classes[typeof(T).Name.Remove(typeof(T).Name.Length - "Class".Length)]);
 
         public MonoClass this[string key] => classes[key];
 
