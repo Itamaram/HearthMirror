@@ -14,24 +14,46 @@ namespace HearthMirror.Proxy
             this.proxy = proxy;
         }
 
+
         public object GetValue(object raw, Type type)
+        {
+            try
+            {
+                return GetValueInternal(raw, type);
+            }
+            catch
+            {
+                proxy.Mirror.Clean();
+
+                try
+                {
+                    return GetValueInternal(raw, type);
+                }
+                catch
+                {
+                    return default;
+                }
+            }
+        }
+
+        public object GetValueInternal(object raw, Type type)
         {
             if (raw == default)
                 return default;
-            
+
             if (type.IsPrimitive || type == typeof(string))
                 return raw;
 
             if (type.IsEnum)
                 return Enum.ToObject(type, (int)raw);
-            
+
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 if (raw.GetType() == type.GenericTypeArguments[0])
                     return raw;
 
-                var mi = (MonoItem) raw;
-                return (bool) mi["has_value"] ? mi["value"] : null;
+                var mi = (MonoItem)raw;
+                return (bool)mi["has_value"] ? mi["value"] : null;
             }
 
             if (type.IsArray)
@@ -49,12 +71,12 @@ namespace HearthMirror.Proxy
 
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
             {
-                var mi = (MonoItem) raw;
+                var mi = (MonoItem)raw;
 
                 var items = (object[])mi["_items"];
                 var size = (int)mi["_size"];
 
-                var list = (IList)Activator.CreateInstance(type); 
+                var list = (IList)Activator.CreateInstance(type);
 
                 for (var i = 0; i < size; i++)
                     list.Add(GetValue(items[i], type.GenericTypeArguments[0]));
@@ -64,20 +86,20 @@ namespace HearthMirror.Proxy
 
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
             {
-                var mi = (MonoItem) raw;
+                var mi = (MonoItem)raw;
 
                 var gt = type.GenericTypeArguments;
 
-                var dst = (IDictionary) Activator.CreateInstance(type);
+                var dst = (IDictionary)Activator.CreateInstance(type);
 
-                var count = (int) mi["count"];
-                var entries = (object[]) mi["entries"];
+                var count = (int)mi["count"];
+                var entries = (object[])mi["entries"];
 
                 for (var i = 0; i < count; i++)
                 {
-                    var entry = (MonoItem) entries[i];
+                    var entry = (MonoItem)entries[i];
 
-                    if ((int) entry["hashCode"] >= 0)
+                    if ((int)entry["hashCode"] >= 0)
                         dst.Add(GetValue(entry["key"], gt[0]), GetValue(entry["value"], gt[1]));
                 }
 

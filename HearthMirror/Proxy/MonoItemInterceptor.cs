@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using Castle.DynamicProxy;
 using HearthMirror.Mono;
 
@@ -24,10 +25,27 @@ namespace HearthMirror.Proxy
             invocation.Proceed();
 
             invocation.ReturnValue = cache.GetOrAdd(GetPropertyName(invocation), name =>
-           {
-               var val = GetPropertyValueInternal(name);
-               return new ObjectValueExtractor(proxy).GetValue(val, invocation.Method.ReturnType);
-           });
+            {
+                var type = invocation.Method.ReturnType;
+
+                try
+                {
+                    return GetValue(name, type);
+                }
+                catch
+                {
+                    proxy.Mirror.Clean();
+
+                    try
+                    {
+                        return GetValue(name, type);
+                    }
+                    catch
+                    {
+                        return default;
+                    }
+                }
+            });
         }
 
         private static string GetPropertyName(IInvocation invocation)
@@ -36,27 +54,8 @@ namespace HearthMirror.Proxy
             return invocation.Method.Name.Substring(4);
         }
 
-        private object GetPropertyValueInternal(string property)
-        {
-            try
-            {
-                return GetPropertyValue(property);
-            }
-            catch
-            {
-                proxy.Mirror.Clean();
-
-                try
-                {
-                    return GetPropertyValue(property);
-                }
-                catch
-                {
-                    return default;
-                }
-            }
-        }
-
+        private object GetValue(string prop, Type type)
+            => new ObjectValueExtractor(proxy).GetValue(GetPropertyValue(prop), type);
     }
 
     public class MonoItemInterceptor : MonoInterceptor
